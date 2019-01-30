@@ -4,7 +4,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import main.ControlsEditor;
+import main.ConfigEditor;
 
 /**
  * Main menu to choose what to configure
@@ -13,12 +13,12 @@ import main.ControlsEditor;
 @SuppressWarnings("serial")
 public class MainMenuPanel extends JPanel implements NamedPanel {
 	//Instance of the main class for switching
-	ControlsEditor mainWindow;
+	ConfigEditor mainWindow;
 	
 	//Labels
 	JLabel title = new JLabel("2019 Controls Editor");
 	
-	public MainMenuPanel(ControlsEditor mainWindow) {
+	public MainMenuPanel(ConfigEditor mainWindow) {
 		this.mainWindow = mainWindow;
 		
 		//Layout and font

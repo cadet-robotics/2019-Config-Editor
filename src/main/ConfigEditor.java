@@ -13,7 +13,7 @@ import panels.MainMenuPanel;
  * 
  * @author Alex Pickering
  */
-public class ControlsEditor {
+public class ConfigEditor {
 	//Main window
 	JFrame mainFrame = new JFrame("2019 Controls Editor");
 	JPanel mainPanel = new JPanel(new CardLayout());
@@ -32,13 +32,13 @@ public class ControlsEditor {
 		}
 		
 		//Run in a non-static method
-		new ControlsEditor();
+		new ConfigEditor();
 	}
 	
 	/**
 	 * Essentially main, but better
 	 */
-	public ControlsEditor() {
+	public ConfigEditor() {
 		createWindow();
 		
 		switchPanel(mainMenu.getPanelName());
