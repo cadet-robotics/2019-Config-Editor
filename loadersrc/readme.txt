@@ -1,1 +1,0 @@
-This folder is here for a temporary home for the location of the WIP config loader code
