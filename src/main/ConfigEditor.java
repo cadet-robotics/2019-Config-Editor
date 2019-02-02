@@ -1,11 +1,21 @@
 package main;
 
 import java.awt.CardLayout;
+import java.awt.Dimension;
+import java.awt.event.WindowEvent;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
+import javax.imageio.ImageIO;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
 
+import config.ProgramConfig;
+import config.RobotConfig;
+import panels.ControlsEditorPanel;
 import panels.MainMenuPanel;
 
 /**
@@ -14,14 +24,26 @@ import panels.MainMenuPanel;
  * @author Alex Pickering
  */
 public class ConfigEditor {
+	//Config
+	public ProgramConfig pcfg;
+	public RobotConfig rcfg;
+	
 	//Main window
 	JFrame mainFrame = new JFrame("2019 Controls Editor");
 	JPanel mainPanel = new JPanel(new CardLayout());
 	
 	//Panels to switch between
 	public MainMenuPanel mainMenu = new MainMenuPanel(this);
+	public ControlsEditorPanel controlsPanel;
 	
-	WindowCloser windowCloser = new WindowCloser(mainFrame);
+	public WindowCloser windowCloser = new WindowCloser(mainFrame);
+	
+	//Images of the RIO and joystick
+	public BufferedImage roboRIOImage,
+						 joystickImage;
+	
+	//Other
+	static final Dimension defaultSize = new Dimension(750, 600);
 	
 	public static void main(String[] args) {
 		//Get better look and feel
@@ -39,13 +61,43 @@ public class ConfigEditor {
 	 * Essentially main, but better
 	 */
 	public ConfigEditor() {
+		loadImages();
+		
+		controlsPanel = new ControlsEditorPanel(joystickImage, this);
+		
 		createWindow();
 		
 		switchPanel(mainMenu.getPanelName());
+		
+		pcfg = new ProgramConfig(this);
+		rcfg = new RobotConfig(this);
+		
+		controlsPanel.updateCfg(rcfg.getRobotConfig());
 	}
 	
+	/**
+	 * Switches the view to the specified panel
+	 * 
+	 * @param panelName The name of the panel to switch to
+	 */
 	public void switchPanel(String panelName) {
 		((CardLayout)(mainPanel.getLayout())).show(mainPanel, panelName);
+	}
+	
+	/**
+	 * Gets the window frame
+	 * 
+	 * @return The main frame
+	 */
+	public JFrame getFrame() {
+		return mainFrame;
+	}
+	
+	/**
+	 * Closes the window safely
+	 */
+	public void close() {
+		windowCloser.windowClosing(new WindowEvent(mainFrame, 0));
 	}
 	
 	/**
@@ -60,9 +112,22 @@ public class ConfigEditor {
 		
 		//Add panels to switch between
 		mainPanel.add(mainMenu, mainMenu.getPanelName());
+		mainPanel.add(controlsPanel, controlsPanel.getPanelName());
 		
 		//Make the thing visible
-		mainFrame.pack();
+		mainFrame.setSize(defaultSize);
 		mainFrame.setVisible(true);
+	}
+	
+	void loadImages() {
+		try {
+			roboRIOImage = ImageIO.read(new File("dat/roborio.jpg"));
+			joystickImage = ImageIO.read(new File("dat/joystick.jpg"));
+		} catch(IOException e) {
+			System.out.println("IOException while reading images");
+			e.printStackTrace();
+			
+			windowCloser.closeWithDialogue("Failed to load images", "Loading Error", JOptionPane.ERROR_MESSAGE);
+		}
 	}
 }

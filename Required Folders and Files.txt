@@ -1,0 +1,6 @@
+The following folders must be kept with the .jar file
+lib
+dat
+
+The following files must be kept with the .jar file
+config.cfg
