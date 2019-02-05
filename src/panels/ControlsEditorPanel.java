@@ -1,16 +1,10 @@
 package panels;
 
-import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-
-import javax.swing.JComboBox;
+import java.util.HashMap;
 import javax.swing.JPanel;
 
 import com.google.gson.JsonObject;
@@ -32,13 +26,11 @@ public class ControlsEditorPanel extends JPanel implements ActionListener, Named
 	//Main instance
 	ConfigEditor mainWindow;
 	
-	//Background image
-	BufferedImage background;
+	//Selector panel
+	ControlSelectorPanel selectorPanel = new ControlSelectorPanel();
 	
-	//Others
-	Dimension jcbSize = new Dimension(125, 40);
-	
-	boolean axes = false; //Whether or not axes are being edited
+	//Control names
+	HashMap<String, String> buttonsMap = new HashMap<>();
 	
 	/**
 	 * Default constructor
@@ -46,11 +38,18 @@ public class ControlsEditorPanel extends JPanel implements ActionListener, Named
 	 * @param mainWindow Instance of main class
 	 */
 	public ControlsEditorPanel(BufferedImage background, ConfigEditor mainWindow) {
-		this.background = background;
 		this.mainWindow = mainWindow;
 		
 		//Layout
-		setLayout(null);
+		
+		//Alignment
+		
+		//Size
+		 selectorPanel.setPreferredSize(new Dimension((int) mainWindow.getDefaultSize().getWidth() / 3, (int) mainWindow.getDefaultSize().getHeight() - 50));
+		
+		//Add components
+		add(selectorPanel);
+		add(new ImagePanel(background));
 	}
 	
 	/**
@@ -62,16 +61,11 @@ public class ControlsEditorPanel extends JPanel implements ActionListener, Named
 		config = jo;
 		controlsConfig = config.getAsJsonObject("controls");
 		
-		//axisControls.clear();
-		//buttonControls.clear();
+		//controlSelector.removeAllItems();
 		
 		for(String k : controlsConfig.keySet()) {
 			if(k.equals("desc")) continue;
-			if(k.contains("axis")) {
-				//axisControls.add(k);
-			} else {
-				//buttonControls.add(k);
-			}
+			//controlSelector.addItem(format(k));
 		}
 	}
 	
@@ -107,21 +101,6 @@ public class ControlsEditorPanel extends JPanel implements ActionListener, Named
 	@Override
 	public String getPanelName() {
 		return "controls";
-	}
-	
-	@Override
-	public void paintComponent(Graphics g1) {
-		super.paintComponent(g1);
-		
-		Graphics2D g = (Graphics2D) g1;
-		
-		g.setColor(Color.white);
-		g.fillRect(0, 0, getWidth(), getHeight());
-		
-		int centX = (getWidth() - background.getWidth()) / 2,
-			centY = (getHeight() - background.getHeight()) / 2;
-		
-		g.drawImage(background, centX, centY, null);
 	}
 
 	@Override

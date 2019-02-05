@@ -93,6 +93,10 @@ public class ConfigEditor {
 		return mainFrame;
 	}
 	
+	public Dimension getDefaultSize() {
+		return defaultSize;
+	}
+	
 	/**
 	 * Closes the window safely
 	 */
