@@ -1,4 +1,4 @@
 # 2019 Config Editor  
-A graphical program to edit the config for the 2019 robot with. Might use in the future if I design it correctly  
+A program used to edit the controls, ports, and general config of our FRC robot  
   
-Current config format uses JSON
+The robot's config uses JSON, and this allows other teams (mostly drive team and electrical) to easily edit the configuration of the robot
