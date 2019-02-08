@@ -54,6 +54,8 @@ public class RobotConfig {
 		} finally {
 			pw.close();
 		}
+		
+		cfe.windowCloser.setSaved(true);
 	}
 	
 	/**

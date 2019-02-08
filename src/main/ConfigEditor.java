@@ -6,6 +6,8 @@ import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
@@ -39,8 +41,8 @@ public class ConfigEditor {
 	public WindowCloser windowCloser = new WindowCloser(mainFrame);
 	
 	//Images of the RIO and joystick
-	public BufferedImage roboRIOImage,
-						 joystickImage;
+	public HashMap<String, BufferedImage> rioImages = new HashMap<>(),
+										  joyImages = new HashMap<>();
 	
 	//Other
 	static final Dimension defaultSize = new Dimension(750, 600);
@@ -63,7 +65,7 @@ public class ConfigEditor {
 	public ConfigEditor() {
 		loadImages();
 		
-		controlsPanel = new ControlsEditorPanel(joystickImage, this);
+		controlsPanel = new ControlsEditorPanel(joyImages.get("joy_def"), this);
 		
 		createWindow();
 		
@@ -125,8 +127,21 @@ public class ConfigEditor {
 	
 	void loadImages() {
 		try {
-			roboRIOImage = ImageIO.read(new File("dat/roborio.jpg"));
-			joystickImage = ImageIO.read(new File("dat/joystick.jpg"));
+			//Get joystick images
+			joyImages.put("joy_def", ImageIO.read(new File("dat/joystick/joystick.jpg")));
+			for(File f : new File("dat/joystick/axes").listFiles())
+				joyImages.put(f.getName(), ImageIO.read(f));
+			for(File f : new File("dat/joystick/buttons").listFiles())
+				joyImages.put(f.getName(), ImageIO.read(f));
+			
+			//Get rio images
+			rioImages.put("rio_def", ImageIO.read(new File("dat/roborio/roborio.jpg")));
+			for(File f : new File("dat/roborio/dio").listFiles())
+				rioImages.put(f.getName(), ImageIO.read(f));
+			for(File f : new File("dat/roborio/pwm").listFiles())
+				rioImages.put(f.getName(), ImageIO.read(f));
+			for(File f: new File("dat/roborio/ani").listFiles())
+				rioImages.put(f.getName(), ImageIO.read(f));
 		} catch(IOException e) {
 			System.out.println("IOException while reading images");
 			e.printStackTrace();

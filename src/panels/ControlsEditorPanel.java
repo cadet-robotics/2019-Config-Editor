@@ -4,7 +4,7 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
-import java.util.HashMap;
+import java.io.IOException;
 import javax.swing.JPanel;
 
 import com.google.gson.JsonObject;
@@ -27,10 +27,14 @@ public class ControlsEditorPanel extends JPanel implements ActionListener, Named
 	ConfigEditor mainWindow;
 	
 	//Selector panel
-	ControlSelectorPanel selectorPanel = new ControlSelectorPanel();
+	ControlSelectorPanel selectorPanel;
 	
-	//Control names
-	HashMap<String, String> buttonsMap = new HashMap<>();
+	//Panel on the rigt
+	RightSidePanel rsp;
+	
+	boolean ready = false;
+	String previousCommand = "",
+		   selectedControl = "";
 	
 	/**
 	 * Default constructor
@@ -40,16 +44,21 @@ public class ControlsEditorPanel extends JPanel implements ActionListener, Named
 	public ControlsEditorPanel(BufferedImage background, ConfigEditor mainWindow) {
 		this.mainWindow = mainWindow;
 		
+		//Setup
+		int selectorWidth = (int) mainWindow.getDefaultSize().getWidth() / 3;
+		selectorPanel = new ControlSelectorPanel(this, selectorWidth);
+		rsp = new RightSidePanel(this, background);
+		
 		//Layout
 		
 		//Alignment
 		
 		//Size
-		 selectorPanel.setPreferredSize(new Dimension((int) mainWindow.getDefaultSize().getWidth() / 3, (int) mainWindow.getDefaultSize().getHeight() - 50));
+		 selectorPanel.setPreferredSize(new Dimension(selectorWidth, (int) mainWindow.getDefaultSize().getHeight() - 50));
 		
 		//Add components
 		add(selectorPanel);
-		add(new ImagePanel(background));
+		add(rsp);
 	}
 	
 	/**
@@ -61,12 +70,14 @@ public class ControlsEditorPanel extends JPanel implements ActionListener, Named
 		config = jo;
 		controlsConfig = config.getAsJsonObject("controls");
 		
-		//controlSelector.removeAllItems();
+		selectorPanel.resetControls();
 		
 		for(String k : controlsConfig.keySet()) {
 			if(k.equals("desc")) continue;
-			//controlSelector.addItem(format(k));
+			selectorPanel.addControl(format(k));
 		}
+		
+		ready = true;
 	}
 	
 	/**
@@ -81,7 +92,7 @@ public class ControlsEditorPanel extends JPanel implements ActionListener, Named
 		String ret = "";
 		
 		for(int i = 0; i < sa.length; i++) {
-			//Split by hyphen (x-axis to X-Axis and not X-axis)\
+			//Split by hyphen (x-axis to X-Axis and not X-axis)
 			String[] sah = sa[i].split("-");
 			sa[i] = "";
 			
@@ -98,14 +109,66 @@ public class ControlsEditorPanel extends JPanel implements ActionListener, Named
 		return ret.substring(1);
 	}
 	
+	void save() {
+		mainWindow.rcfg.setRobotConfig(config);
+		
+		try {
+			mainWindow.rcfg.save();
+		} catch(IOException e1) {
+			e1.printStackTrace();
+		}
+	}
+	
 	@Override
 	public String getPanelName() {
 		return "controls";
 	}
 
 	@Override
-	public void actionPerformed(ActionEvent arg0) {
-		// TODO Auto-generated method stub
+	public void actionPerformed(ActionEvent e) {
+		if(!ready) return;
 		
+		String command = e.getActionCommand().toLowerCase();
+		System.out.println(command);
+		
+		//Command from the selectors
+		if(command.contains("&")) {
+			String v = command.split("&")[1];
+			
+			//Command is from a click
+			if(previousCommand.contains("&") && previousCommand.split("&")[1].equals("null")) {
+				if(command.contains("_")) { //underscores mean it was the control
+					if(command.startsWith("buttons")) {
+						selectorPanel.buttonsPanel.setValueSelection(0);
+					} else if(command.startsWith("axes")) {
+						// broke selectorPanel.axesPanel.setValueSelection(config.get(v).getAsInt());
+					}
+				} else {
+					//Config changed, set unsaved
+					mainWindow.windowCloser.setSaved(false);
+				}
+			} else if(!command.contains("null") && !command.contains("_")){
+				if(command.startsWith("buttons")) {
+					rsp.setImage(mainWindow.joyImages.get("joystick_buttons_" + v + ".jpg"));
+				} else if(command.startsWith("axes")) {
+					rsp.setImage(mainWindow.joyImages.get("joystick_axes_" + v + ".jpg"));
+				}
+				
+				rsp.repaint();
+			}
+		} else {
+			switch(command) {
+				case "save":
+					save();
+					break;
+				
+				case "back":
+					save();
+					mainWindow.switchPanel("Main Menu");
+					break;
+			}
+		}
+		
+		previousCommand = command;
 	}
 }
