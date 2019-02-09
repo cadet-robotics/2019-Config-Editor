@@ -2,7 +2,6 @@ This isn't a manifest file. IDK why github thinks it is in the insights section
 Its just some things that should be kept with the .jar file once its been exported
 
 The following folders must be kept with the .jar file
-lib
 dat
 
 The following files must be kept with the .jar file
