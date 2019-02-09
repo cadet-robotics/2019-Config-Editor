@@ -6,7 +6,6 @@ import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.imageio.ImageIO;
@@ -19,6 +18,7 @@ import config.ProgramConfig;
 import config.RobotConfig;
 import panels.ControlsEditorPanel;
 import panels.MainMenuPanel;
+import panels.PortEditorPanel;
 
 /**
  * Program to edit the robot controls and ports from a GUI
@@ -37,6 +37,7 @@ public class ConfigEditor {
 	//Panels to switch between
 	public MainMenuPanel mainMenu = new MainMenuPanel(this);
 	public ControlsEditorPanel controlsPanel;
+	public PortEditorPanel portPanel;
 	
 	public WindowCloser windowCloser = new WindowCloser(mainFrame);
 	
@@ -66,6 +67,7 @@ public class ConfigEditor {
 		loadImages();
 		
 		controlsPanel = new ControlsEditorPanel(joyImages.get("joy_def"), this);
+		portPanel = new PortEditorPanel(rioImages.get("rio_def"), this);
 		
 		createWindow();
 		
@@ -73,16 +75,24 @@ public class ConfigEditor {
 		
 		pcfg = new ProgramConfig(this);
 		rcfg = new RobotConfig(this);
-		
-		controlsPanel.updateCfg(rcfg.getRobotConfig());
 	}
 	
 	/**
 	 * Switches the view to the specified panel
+	 * Updates the robot config for each editor as well, for when
+	 * it switches to them
 	 * 
 	 * @param panelName The name of the panel to switch to
 	 */
 	public void switchPanel(String panelName) {
+		if(panelName.equals(controlsPanel.getPanelName())) {
+			controlsPanel.updateCfg(rcfg.getRobotConfig());
+			windowCloser.setSaved(true);
+		} else if(panelName.equals(portPanel.getPanelName())) {
+			portPanel.updateCfg(rcfg.getRobotConfig());
+			windowCloser.setSaved(true);
+		}
+		
 		((CardLayout)(mainPanel.getLayout())).show(mainPanel, panelName);
 	}
 	
@@ -111,6 +121,7 @@ public class ConfigEditor {
 	 */
 	void createWindow() {
 		//Setup window
+		mainFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		mainFrame.addWindowListener(windowCloser);
 		mainFrame.setLocationRelativeTo(null);
 		mainFrame.setResizable(false);
@@ -119,6 +130,7 @@ public class ConfigEditor {
 		//Add panels to switch between
 		mainPanel.add(mainMenu, mainMenu.getPanelName());
 		mainPanel.add(controlsPanel, controlsPanel.getPanelName());
+		mainPanel.add(portPanel, portPanel.getPanelName());
 		
 		//Make the thing visible
 		mainFrame.setSize(defaultSize);
@@ -148,5 +160,34 @@ public class ConfigEditor {
 			
 			windowCloser.closeWithDialogue("Failed to load images", "Loading Error", JOptionPane.ERROR_MESSAGE);
 		}
+	}
+	
+	/**
+	 * Formats a name into a more 'readable' version
+	 * 
+	 * @param s The string to format
+	 * @return The formatted string
+	 */
+	public String format(String str) {
+		//Split by word
+		String[] sa = str.split(" ");
+		String ret = "";
+		
+		for(int i = 0; i < sa.length; i++) {
+			//Split by hyphen (x-axis to X-Axis and not X-axis)
+			String[] sah = sa[i].split("-");
+			sa[i] = "";
+			
+			for(int j = 0; j < sah.length; j++) {
+				sah[j] = sah[j].substring(0, 1).toUpperCase() + sah[j].substring(1);
+				sa[i] += "-" + sah[j];
+			}
+			
+			sa[i] = sa[i].substring(1);
+			
+			ret += " " + sa[i];
+		}
+		
+		return ret.substring(1);
 	}
 }

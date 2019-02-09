@@ -20,8 +20,7 @@ import main.ConfigEditor;
 @SuppressWarnings("serial")
 public class ControlsEditorPanel extends JPanel implements ActionListener, NamedPanel {
 	//Config file stuff
-	JsonObject config,
-			   controlsConfig;
+	JsonObject config;
 	
 	//Main instance
 	ConfigEditor mainWindow;
@@ -33,12 +32,12 @@ public class ControlsEditorPanel extends JPanel implements ActionListener, Named
 	RightSidePanel rsp;
 	
 	boolean ready = false;
-	String previousCommand = "",
-		   selectedControl = "";
+	String previousCommand = "";
 	
 	/**
 	 * Default constructor
 	 * 
+	 * @param background Default image to show on the right
 	 * @param mainWindow Instance of main class
 	 */
 	public ControlsEditorPanel(BufferedImage background, ConfigEditor mainWindow) {
@@ -48,10 +47,6 @@ public class ControlsEditorPanel extends JPanel implements ActionListener, Named
 		int selectorWidth = (int) mainWindow.getDefaultSize().getWidth() / 3;
 		selectorPanel = new ControlSelectorPanel(this, selectorWidth);
 		rsp = new RightSidePanel(this, background);
-		
-		//Layout
-		
-		//Alignment
 		
 		//Size
 		 selectorPanel.setPreferredSize(new Dimension(selectorWidth, (int) mainWindow.getDefaultSize().getHeight() - 50));
@@ -64,58 +59,41 @@ public class ControlsEditorPanel extends JPanel implements ActionListener, Named
 	/**
 	 * Updates configuration variables
 	 * 
-	 * @param jo The JsonObject containing the config
+	 * @param jo The JsonObject containing the robot's config
 	 */
 	public void updateCfg(JsonObject jo) {
-		config = jo;
-		controlsConfig = config.getAsJsonObject("controls");
+		config = jo.getAsJsonObject("controls");
 		
 		selectorPanel.resetControls();
 		
-		for(String k : controlsConfig.keySet()) {
+		for(String k : config.keySet()) {
 			if(k.equals("desc")) continue;
-			selectorPanel.addControl(format(k));
+			selectorPanel.addControl(mainWindow.format(k));
 		}
 		
 		ready = true;
+		
+		//Update initial selections
+		selectorPanel.axesPanel.setValueSelection(config.get(selectorPanel.axesPanel.getControlSelection().toLowerCase()).getAsInt());
+		selectorPanel.buttonsPanel.setValueSelection(config.get(selectorPanel.buttonsPanel.getControlSelection().toLowerCase()).getAsInt());
+		selectTabImage(0);
 	}
 	
 	/**
-	 * Formats a control key into a more 'readable' version
-	 * 
-	 * @param s The string to format
-	 * @return The formatted string
+	 * Saves the robot config
 	 */
-	String format(String str) {
-		//Split by word
-		String[] sa = str.split(" ");
-		String ret = "";
-		
-		for(int i = 0; i < sa.length; i++) {
-			//Split by hyphen (x-axis to X-Axis and not X-axis)
-			String[] sah = sa[i].split("-");
-			sa[i] = "";
-			
-			for(int j = 0; j < sah.length; j++) {
-				sah[j] = sah[j].substring(0, 1).toUpperCase() + sah[j].substring(1);
-				sa[i] += "-" + sah[j];
-			}
-			
-			sa[i] = sa[i].substring(1);
-			
-			ret += " " + sa[i];
-		}
-		
-		return ret.substring(1);
-	}
-	
 	void save() {
-		mainWindow.rcfg.setRobotConfig(config);
+		JsonObject newRobotConfig = mainWindow.rcfg.getRobotConfig();
+		
+		newRobotConfig.remove("controls");
+		newRobotConfig.add("controls", config);
+		
+		mainWindow.rcfg.setRobotConfig(newRobotConfig);
 		
 		try {
 			mainWindow.rcfg.save();
-		} catch(IOException e1) {
-			e1.printStackTrace();
+		} catch(IOException e) {
+			e.printStackTrace();
 		}
 	}
 	
@@ -129,6 +107,7 @@ public class ControlsEditorPanel extends JPanel implements ActionListener, Named
 		if(!ready) return;
 		
 		String command = e.getActionCommand().toLowerCase();
+		System.out.println(previousCommand);
 		System.out.println(command);
 		
 		//Command from the selectors
@@ -137,21 +116,33 @@ public class ControlsEditorPanel extends JPanel implements ActionListener, Named
 			
 			//Command is from a click
 			if(previousCommand.contains("&") && previousCommand.split("&")[1].equals("null")) {
-				if(command.contains("_")) { //underscores mean it was the control
+				if(command.contains("_")) { //underscores mean it was the control, updated selected value to match config
 					if(command.startsWith("buttons")) {
-						selectorPanel.buttonsPanel.setValueSelection(0);
+						selectorPanel.buttonsPanel.setValueSelection(config.get(v).getAsInt());
 					} else if(command.startsWith("axes")) {
-						// broke selectorPanel.axesPanel.setValueSelection(config.get(v).getAsInt());
+						selectorPanel.axesPanel.setValueSelection(config.get(v).getAsInt());
 					}
-				} else {
+				} else { //Changed the selected value, update config to match
+					if(command.startsWith("buttons")) {
+						config.remove(selectorPanel.buttonsPanel.getControlSelection().toLowerCase());
+						config.addProperty(selectorPanel.buttonsPanel.getControlSelection().toLowerCase(), Integer.parseInt(selectorPanel.buttonsPanel.getValueSelection()));
+					} else if(command.startsWith("axes")) {
+						config.remove(selectorPanel.axesPanel.getControlSelection().toLowerCase());
+						config.addProperty(selectorPanel.axesPanel.getControlSelection().toLowerCase(), Integer.parseInt(selectorPanel.axesPanel.getValueSelection()));
+					}
+						
 					//Config changed, set unsaved
 					mainWindow.windowCloser.setSaved(false);
 				}
-			} else if(!command.contains("null") && !command.contains("_")){
+			}
+			
+			if(!command.contains("_") && !command.contains("null")) {
 				if(command.startsWith("buttons")) {
 					rsp.setImage(mainWindow.joyImages.get("joystick_buttons_" + v + ".jpg"));
 				} else if(command.startsWith("axes")) {
 					rsp.setImage(mainWindow.joyImages.get("joystick_axes_" + v + ".jpg"));
+				} else if(command.startsWith("tab")) { //Switched tab, update image
+					selectTabImage(Integer.parseInt(v));
 				}
 				
 				rsp.repaint();
@@ -164,11 +155,29 @@ public class ControlsEditorPanel extends JPanel implements ActionListener, Named
 				
 				case "back":
 					save();
+					ready = false;
 					mainWindow.switchPanel("Main Menu");
 					break;
 			}
 		}
 		
 		previousCommand = command;
+	}
+	
+	/**
+	 * Selects the current image based on a tab change
+	 * 
+	 * @param i The new index
+	 */
+	void selectTabImage(int i) {
+		switch(i) {
+			case 0:	//buttons
+				rsp.setImage(mainWindow.joyImages.get("joystick_buttons_" + selectorPanel.buttonsPanel.getValueSelection() + ".jpg"));
+				break;
+			
+			case 1:	//axes
+				rsp.setImage(mainWindow.joyImages.get("joystick_axes_" + selectorPanel.axesPanel.getValueSelection() + ".jpg"));
+				break;
+		}
 	}
 }

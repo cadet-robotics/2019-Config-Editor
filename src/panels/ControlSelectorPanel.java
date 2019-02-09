@@ -1,12 +1,15 @@
 package panels;
 
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
 import java.util.List;
 
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import panels.components.HighlightingComboBox;
 import panels.components.Spacer;
@@ -14,13 +17,13 @@ import panels.components.Spacer;
 /**
  * Contains the things to select between buttons and axes,
  * and the selectors from each
+ * 
  * @author Alex Pickering
  */
 @SuppressWarnings("serial")
 public class ControlSelectorPanel extends JTabbedPane {
 	public ControlsPanel buttonsPanel,
-						 axesPanel,
-						 otherPanel;
+						 axesPanel;
 	
 	ControlsEditorPanel cep;
 	
@@ -33,18 +36,23 @@ public class ControlSelectorPanel extends JTabbedPane {
 	public ControlSelectorPanel(ControlsEditorPanel cep, int width) {
 		this.cep = cep;
 		
+		//Setup IDs
 		List<Integer> buttonIDs = List.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12),
-					  axisIDs = List.of(0, 1, 2, 3),
-					  otherIDs = List.of(1);
+					  axisIDs = List.of(0, 1, 2, 3);
 		
+		//Setup panels with the selectors
 		buttonsPanel = new ControlsPanel("Select a control to edit", "buttons", buttonIDs, cep, width - 20);
 		axesPanel = new ControlsPanel("Select an axis to edit", "axes", axisIDs, cep, width - 20);
-		otherPanel = new ControlsPanel("Select an item to edit", "other", otherIDs, cep, width - 20);
 		
 		//Add tabs
 		addTab("Buttons", buttonsPanel);
 		addTab("Axes", axesPanel);
-		addTab("Other", otherPanel);
+		
+		addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				cep.actionPerformed(new ActionEvent(this, 0, "tab&" + getSelectedIndex()));
+			}
+		});
 	}
 	
 	/**
@@ -54,7 +62,6 @@ public class ControlSelectorPanel extends JTabbedPane {
 	public void resetControls() {
 		buttonsPanel.resetControls();
 		axesPanel.resetControls();
-		otherPanel.resetControls();
 	}
 	
 	/**
@@ -64,11 +71,10 @@ public class ControlSelectorPanel extends JTabbedPane {
 	 */
 	public void addControl(String name) {
 		String lName = name.toLowerCase();
+		
 		if(lName.contains("axis")) {
 			axesPanel.addControl(name);
-		} else if(checkOther(lName)) {
-			otherPanel.addControl(name);
-		} else {
+		} else if(!checkOther(lName)) {
 			buttonsPanel.addControl(name);
 		}
 	}
@@ -80,7 +86,7 @@ public class ControlSelectorPanel extends JTabbedPane {
 	 * @return Whether or not this is in the 'other' section
 	 */
 	boolean checkOther(String name) {
-		if(name.contains("joystick")) {
+		if(name.equals("main joystick")) {
 			return true;
 		}
 		
@@ -90,6 +96,7 @@ public class ControlSelectorPanel extends JTabbedPane {
 
 /**
  * Contains the selectors for selecting the controls
+ * 
  * @author Alex Pickering
  */
 @SuppressWarnings("serial")
@@ -102,22 +109,27 @@ class ControlsPanel extends JPanel {
 	public ControlsPanel(String info, String category, List<Integer> range, ControlsEditorPanel cep, int width) {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		
+		//Setup selectors
 		controlSelectorBox = new HighlightingComboBox<>(cep, category + "_");
+		controlSelectorBox.setMaximumRowCount(25);
 		controlSelectorBox.setMaximumSize(new Dimension(width, 30));
 		controlSelectorBox.setAlignmentX(CENTER_ALIGNMENT);
 		
 		valueSelectorBox = new HighlightingComboBox<>(cep, category);
+		valueSelectorBox.setMaximumRowCount(25);
 		valueSelectorBox.setMaximumSize(new Dimension(width, 30));
 		valueSelectorBox.setAlignmentX(CENTER_ALIGNMENT);
 		
 		range.forEach(v -> valueSelectorBox.addItem(v));
 		
-		this.infoLabel = new JLabel(info);
+		//Setup labels
+		infoLabel = new JLabel(info);
 		infoLabel.setAlignmentX(CENTER_ALIGNMENT);
 		
 		valueLabel = new JLabel("Select the value of the control");
 		valueLabel.setAlignmentX(CENTER_ALIGNMENT);
 		
+		//Add components
 		add(Spacer.genSpacer(10));
 		add(infoLabel);
 		add(controlSelectorBox);
@@ -148,10 +160,10 @@ class ControlsPanel extends JPanel {
 	/**
 	 * Sets which value is selected
 	 * 
-	 * @param item The name
+	 * @param item The item to be selected
 	 */
-	public void setValueSelection(int index) {
-		valueSelectorBox.setSelectedItem(index);
+	public void setValueSelection(int item) {
+		valueSelectorBox.setSelectedItem(item);
 	}
 	
 	

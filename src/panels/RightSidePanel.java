@@ -36,6 +36,9 @@ public class RightSidePanel extends JPanel {
 		if(parent instanceof ControlsEditorPanel) {
 			save.addActionListener((ControlsEditorPanel) parent);
 			back.addActionListener((ControlsEditorPanel) parent);
+		} else if(parent instanceof PortEditorPanel) {
+			save.addActionListener((PortEditorPanel) parent);
+			back.addActionListener((PortEditorPanel) parent);
 		}
 		
 		topPanel = new JPanel();
