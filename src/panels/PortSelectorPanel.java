@@ -26,7 +26,8 @@ import javax.swing.JPanel;
 public class PortSelectorPanel extends JTabbedPane {
 	public PortsPanel pwmPanel,
 					  dioPanel,
-					  ainPanel;
+					  ainPanel,
+					  canPanel;
 	
 	PortEditorPanel pep;
 	
@@ -40,13 +41,14 @@ public class PortSelectorPanel extends JTabbedPane {
 		this.pep = pep;
 		
 		//Setup IDs
-		List<Integer> pwmDioIDs = List.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9),
+		List<Integer> pwmIDs = List.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9),
+					  dioIDs = List.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9),
 					  ainIDs = List.of(0, 1, 2, 3);
 		
 		//Setup panels with selectors
-		pwmPanel = new PortsPanel("Select a PWM port to edit", "pwm", pwmDioIDs, pep, width - 20);
-		dioPanel = new PortsPanel("Select a DIO port to edit", "dio", pwmDioIDs, pep, width - 20);
-		ainPanel = new PortsPanel("Select a AIn port to edit", "ain", ainIDs, pep, width - 20);
+		pwmPanel = new PortsPanel("Select a PWM item to edit", "pwm", pwmIDs, pep, width - 20);
+		dioPanel = new PortsPanel("Select a DIO item to edit", "dio", dioIDs, pep, width - 20);
+		ainPanel = new PortsPanel("Select a AIn item to edit", "ain", ainIDs, pep, width - 20);
 		
 		//Add tabs
 		addTab("PWM", pwmPanel);

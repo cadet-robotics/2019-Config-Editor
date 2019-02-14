@@ -103,7 +103,16 @@ public class MainMenuPanel extends JPanel implements ActionListener, NamedPanel 
 			Process p = pb.start();
 			BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
 			
-			outputWindow.show(br);
+			new Thread(() -> {
+				String s = "";
+				try {
+					while((s = br.readLine()) != null) {
+						outputWindow.getOutputArea().append(s + "\n");
+						int n = outputWindow.getOutputArea().getDocument().getLength();
+						outputWindow.getOutputArea().select(n, n);
+					}
+				} catch(IOException e) {e.printStackTrace();}
+			}).start();
 		} catch(IOException e) {
 			JOptionPane.showMessageDialog(null, "IOException while deploying", "IOException", JOptionPane.ERROR_MESSAGE);
 			e.printStackTrace();

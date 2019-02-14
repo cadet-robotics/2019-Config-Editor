@@ -2,7 +2,6 @@ package main;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
 import java.io.IOException;
 
 import javax.swing.BoxLayout;
@@ -33,7 +32,7 @@ public class ConsoleWindow extends JFrame {
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setLocationRelativeTo(null);
 		setResizable(true);
-		setTitle("Deploy Output - Please wait for execution to finish");
+		setTitle("Deploy Output - Please wait");
 		
 		add(cp);
 		
@@ -42,12 +41,21 @@ public class ConsoleWindow extends JFrame {
 	}
 	
 	/**
-	 * Adds the bufferedreader for console output
+	 * Gets the output area
 	 * 
-	 * @param in The bufferedreader
+	 * @return The output area
 	 */
-	public void show(BufferedReader in) throws IOException {
-		cp.show(in);
+	public JTextArea getOutputArea() {
+		return cp.getOutputArea();
+	}
+	
+	/**
+	 * Gets the panel
+	 * 
+	 * @return le panel
+	 */
+	public JPanel getPanel() {
+		return cp;
 	}
 }
 
@@ -61,7 +69,7 @@ class ConsolePanel extends JPanel implements ActionListener {
 	JFrame parent;
 	
 	JScrollPane scrollPane;
-	JTextArea outputArea = new JTextArea("Deploying code...");
+	JTextArea outputArea = new JTextArea();
 	
 	JButton exitButton = new JButton("Close Window");
 	
@@ -79,6 +87,7 @@ class ConsolePanel extends JPanel implements ActionListener {
 		outputArea.setEditable(false);
 		
 		scrollPane = new JScrollPane(outputArea);
+		scrollPane.setAutoscrolls(true);
 		scrollPane.setAlignmentX(CENTER_ALIGNMENT);
 		
 		exitButton.setActionCommand("exit");
@@ -90,25 +99,12 @@ class ConsolePanel extends JPanel implements ActionListener {
 	}
 	
 	/**
-	 * Displays the console output
+	 * Gets the output area
 	 * 
-	 * @param in The input reader
-	 * @throws IOException 
+	 * @return The output area
 	 */
-	public void show(BufferedReader in) throws IOException {
-		outputArea.setText("");
-		
-		//Show output
-		while(true) {
-			String line = in.readLine();
-			if(line == null) {
-				break;
-			}
-			
-			outputArea.append(line + "\n");
-		}
-		
-		parent.setTitle("Deploy Output");
+	public JTextArea getOutputArea() {
+		return outputArea;
 	}
 	
 	@Override

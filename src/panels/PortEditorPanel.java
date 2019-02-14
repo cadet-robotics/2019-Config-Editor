@@ -70,8 +70,14 @@ public class PortEditorPanel extends JPanel implements ActionListener, NamedPane
 		//Loop over each section and item
 		for(String cat : config.keySet()) {
 			if(cat.equals("pwm") || cat.equals("dio") || cat.equals("analog in")) {
-				for(String k : config.get(cat).getAsJsonObject().keySet()) {
+				for(String k : config.getAsJsonObject(cat).keySet()) {
 					if(k.equals("desc")) continue;
+					
+					if(cat.equals("pwm")) {
+						JsonObject obj = config.getAsJsonObject(cat).getAsJsonObject(k);
+						if(obj.get("type").getAsString().equals("can")) continue;
+					}
+					
 					selectorPanel.addItem(mainWindow.format(k), cat);
 				}
 			}
@@ -80,9 +86,9 @@ public class PortEditorPanel extends JPanel implements ActionListener, NamedPane
 		ready = true;
 		
 		//Update initial selections
-		selectorPanel.pwmPanel.setValueSelection(config.get("pwm").getAsJsonObject().get(selectorPanel.pwmPanel.getItemSelection().toLowerCase()).getAsInt());
-		selectorPanel.dioPanel.setValueSelection(config.get("dio").getAsJsonObject().get(selectorPanel.dioPanel.getItemSelection().toLowerCase()).getAsInt());
-		selectorPanel.ainPanel.setValueSelection(config.get("analog in").getAsJsonObject().get(selectorPanel.ainPanel.getItemSelection().toLowerCase()).getAsInt());
+		selectorPanel.pwmPanel.setValueSelection(config.getAsJsonObject("pwm").getAsJsonObject(selectorPanel.pwmPanel.getItemSelection().toLowerCase()).get("id").getAsInt());
+		selectorPanel.dioPanel.setValueSelection(config.getAsJsonObject("dio").get(selectorPanel.dioPanel.getItemSelection().toLowerCase()).getAsInt());
+		selectorPanel.ainPanel.setValueSelection(config.getAsJsonObject("analog in").get(selectorPanel.ainPanel.getItemSelection().toLowerCase()).getAsInt());
 		selectTabImage(0);
 	}
 	
@@ -119,16 +125,21 @@ public class PortEditorPanel extends JPanel implements ActionListener, NamedPane
 			if(previousCommand.contains("&") && previousCommand.split("&")[1].equals("null")) {
 				if(command.contains("_")) { //Selected item updated
 					if(command.startsWith("pwm")) {
-						selectorPanel.pwmPanel.setValueSelection(config.get("pwm").getAsJsonObject().get(v).getAsInt());
+						selectorPanel.pwmPanel.setValueSelection(config.getAsJsonObject("pwm").getAsJsonObject(v).get("id").getAsInt());
 					} else if(command.startsWith("dio")) {
-						selectorPanel.dioPanel.setValueSelection(config.get("dio").getAsJsonObject().get(v).getAsInt());
+						selectorPanel.dioPanel.setValueSelection(config.getAsJsonObject("dio").get(v).getAsInt());
 					} else if(command.startsWith("ain")) {
-						selectorPanel.ainPanel.setValueSelection(config.get("analog in").getAsJsonObject().get(v).getAsInt());
+						selectorPanel.ainPanel.setValueSelection(config.getAsJsonObject("analog in").get(v).getAsInt());
 					}
 				} else { //value updated
 					if(command.startsWith("pwm")) {
 						config.get("pwm").getAsJsonObject().remove(selectorPanel.pwmPanel.getItemSelection().toLowerCase());
-						config.get("pwm").getAsJsonObject().addProperty(selectorPanel.pwmPanel.getItemSelection().toLowerCase(), Integer.parseInt(selectorPanel.pwmPanel.getValueSelection()));
+						
+						JsonObject obj = new JsonObject();
+						obj.addProperty("type", "pwm");
+						obj.addProperty("id", Integer.parseInt(selectorPanel.pwmPanel.getValueSelection()));
+						
+						config.get("pwm").getAsJsonObject().add(selectorPanel.pwmPanel.getItemSelection().toLowerCase(), obj);
 					} else if(command.startsWith("dio")) {
 						config.get("dio").getAsJsonObject().remove(selectorPanel.dioPanel.getItemSelection().toLowerCase());
 						config.get("dio").getAsJsonObject().addProperty(selectorPanel.dioPanel.getItemSelection().toLowerCase(), Integer.parseInt(selectorPanel.dioPanel.getValueSelection()));
@@ -144,6 +155,7 @@ public class PortEditorPanel extends JPanel implements ActionListener, NamedPane
 			//Value highlighted of tab changed
 			if(!command.contains("_") && !command.contains("null")) {
 				if(command.startsWith("pwm")) {
+					if(Integer.parseInt(v) < 0) v = "can";
 					rsp.setImage(mainWindow.rioImages.get("roborio_pwm_" + v + ".jpg"));
 				} else if(command.startsWith("dio")) {
 					rsp.setImage(mainWindow.rioImages.get("roborio_dio_" + v + ".jpg"));
@@ -180,7 +192,9 @@ public class PortEditorPanel extends JPanel implements ActionListener, NamedPane
 	void selectTabImage(int i) {
 		switch(i) {
 			case 0: //PWM
-				rsp.setImage(mainWindow.rioImages.get("roborio_pwm_" + selectorPanel.pwmPanel.getValueSelection() + ".jpg"));
+				String val = selectorPanel.pwmPanel.getValueSelection();
+				if(Integer.parseInt(val) < 0) val = "can";
+				rsp.setImage(mainWindow.rioImages.get("roborio_pwm_" + val + ".jpg"));
 				break;
 			
 			case 1: //DIO
