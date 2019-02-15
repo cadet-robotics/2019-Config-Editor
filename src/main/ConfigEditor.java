@@ -43,7 +43,8 @@ public class ConfigEditor {
 	
 	//Images of the RIO and joystick
 	public HashMap<String, BufferedImage> rioImages = new HashMap<>(),
-										  joyImages = new HashMap<>();
+										  joyImages = new HashMap<>(),
+										  pcmImages = new HashMap<>();
 	
 	//Other
 	static final Dimension defaultSize = new Dimension(750, 600);
@@ -154,6 +155,11 @@ public class ConfigEditor {
 				rioImages.put(f.getName(), ImageIO.read(f));
 			for(File f: new File("dat/roborio/ani").listFiles())
 				rioImages.put(f.getName(), ImageIO.read(f));
+			
+			//Get PCM images
+			pcmImages.put("pcm_def", ImageIO.read(new File("dat/pcm/pcm_def.jpg")));
+			for(File f : new File("dat/pcm").listFiles())
+				pcmImages.put(f.getName(), ImageIO.read(f));
 		} catch(IOException e) {
 			System.out.println("IOException while reading images");
 			e.printStackTrace();

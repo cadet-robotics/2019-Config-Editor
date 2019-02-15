@@ -1,6 +1,7 @@
 package panels;
 
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
@@ -43,6 +44,7 @@ public class PortEditorPanel extends JPanel implements ActionListener, NamedPane
 	 */
 	public PortEditorPanel(BufferedImage background, ConfigEditor mainWindow) {
 		this.mainWindow = mainWindow;
+		setLayout(new FlowLayout(FlowLayout.LEFT));
 		
 		//Setup
 		int selectorWidth = (int) mainWindow.getDefaultSize().getWidth() / 4;
@@ -69,7 +71,7 @@ public class PortEditorPanel extends JPanel implements ActionListener, NamedPane
 		
 		//Loop over each section and item
 		for(String cat : config.keySet()) {
-			if(cat.equals("pwm") || cat.equals("dio") || cat.equals("analog in")) {
+			if(cat.equals("pwm") || cat.equals("dio") || cat.equals("analog in") || cat.equals("pcm")) {
 				for(String k : config.getAsJsonObject(cat).keySet()) {
 					if(k.equals("desc")) continue;
 					
@@ -91,6 +93,7 @@ public class PortEditorPanel extends JPanel implements ActionListener, NamedPane
 		selectorPanel.pwmPanel.setValueSelection(config.getAsJsonObject("pwm").getAsJsonObject(selectorPanel.pwmPanel.getItemSelection().toLowerCase()).get("id").getAsInt());
 		selectorPanel.dioPanel.setValueSelection(config.getAsJsonObject("dio").get(selectorPanel.dioPanel.getItemSelection().toLowerCase()).getAsInt());
 		selectorPanel.ainPanel.setValueSelection(config.getAsJsonObject("analog in").get(selectorPanel.ainPanel.getItemSelection().toLowerCase()).getAsInt());
+		selectorPanel.pcmPanel.setValueSelection(config.getAsJsonObject("pcm").get(selectorPanel.pcmPanel.getItemSelection().toLowerCase()).getAsInt());
 		selectTabImage(0);
 	}
 	
@@ -132,22 +135,27 @@ public class PortEditorPanel extends JPanel implements ActionListener, NamedPane
 						selectorPanel.dioPanel.setValueSelection(config.getAsJsonObject("dio").get(v).getAsInt());
 					} else if(command.startsWith("ain")) {
 						selectorPanel.ainPanel.setValueSelection(config.getAsJsonObject("analog in").get(v).getAsInt());
+					} else if(command.startsWith("pcm")) {
+						selectorPanel.pcmPanel.setValueSelection(config.getAsJsonObject("pcm").get(v).getAsInt());
 					}
 				} else { //value updated
 					if(command.startsWith("pwm")) {
-						config.get("pwm").getAsJsonObject().remove(selectorPanel.pwmPanel.getItemSelection().toLowerCase());
+						config.getAsJsonObject("pwm").remove(selectorPanel.pwmPanel.getItemSelection().toLowerCase());
 						
 						JsonObject obj = new JsonObject();
 						obj.addProperty("type", "pwm");
 						obj.addProperty("id", Integer.parseInt(selectorPanel.pwmPanel.getValueSelection()));
 						
-						config.get("pwm").getAsJsonObject().add(selectorPanel.pwmPanel.getItemSelection().toLowerCase(), obj);
+						config.getAsJsonObject("pwm").add(selectorPanel.pwmPanel.getItemSelection().toLowerCase(), obj);
 					} else if(command.startsWith("dio")) {
-						config.get("dio").getAsJsonObject().remove(selectorPanel.dioPanel.getItemSelection().toLowerCase());
-						config.get("dio").getAsJsonObject().addProperty(selectorPanel.dioPanel.getItemSelection().toLowerCase(), Integer.parseInt(selectorPanel.dioPanel.getValueSelection()));
+						config.getAsJsonObject("dio").remove(selectorPanel.dioPanel.getItemSelection().toLowerCase());
+						config.getAsJsonObject("dio").addProperty(selectorPanel.dioPanel.getItemSelection().toLowerCase(), Integer.parseInt(selectorPanel.dioPanel.getValueSelection()));
 					} else if(command.startsWith("ain")) {
-						config.get("analog in").getAsJsonObject().remove(selectorPanel.ainPanel.getItemSelection().toLowerCase());
-						config.get("analog in").getAsJsonObject().addProperty(selectorPanel.ainPanel.getItemSelection().toLowerCase(), Integer.parseInt(selectorPanel.ainPanel.getValueSelection()));
+						config.getAsJsonObject("analog in").remove(selectorPanel.ainPanel.getItemSelection().toLowerCase());
+						config.getAsJsonObject("analog in").addProperty(selectorPanel.ainPanel.getItemSelection().toLowerCase(), Integer.parseInt(selectorPanel.ainPanel.getValueSelection()));
+					} else if(command.startsWith("pcm")) {
+						config.getAsJsonObject("pcm").remove(selectorPanel.pcmPanel.getItemSelection().toLowerCase());
+						config.getAsJsonObject("pcm").addProperty(selectorPanel.pcmPanel.getItemSelection().toLowerCase(), Integer.parseInt(selectorPanel.pcmPanel.getValueSelection()));
 					}
 					
 					mainWindow.windowCloser.setSaved(false);
@@ -163,6 +171,8 @@ public class PortEditorPanel extends JPanel implements ActionListener, NamedPane
 					rsp.setImage(mainWindow.rioImages.get("roborio_dio_" + v + ".jpg"));
 				} else if(command.startsWith("ain")) {
 					rsp.setImage(mainWindow.rioImages.get("roborio_ani_" + v + ".jpg"));
+				} else if(command.startsWith("pcm")) {
+					rsp.setImage(mainWindow.pcmImages.get("pcm_" + v + ".jpg"));
 				} else if(command.startsWith("tab")) {
 					selectTabImage(Integer.parseInt(v));
 				}
@@ -205,6 +215,10 @@ public class PortEditorPanel extends JPanel implements ActionListener, NamedPane
 			
 			case 2: //AIn
 				rsp.setImage(mainWindow.rioImages.get("roborio_ani_" + selectorPanel.ainPanel.getValueSelection() + ".jpg"));
+				break;
+			
+			case 3: //PCM
+				rsp.setImage(mainWindow.pcmImages.get("pcm_" + selectorPanel.pcmPanel.getValueSelection() + ".jpg"));
 				break;
 		}
 	}

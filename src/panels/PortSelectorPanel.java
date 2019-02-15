@@ -29,7 +29,7 @@ public class PortSelectorPanel extends JTabbedPane {
 	public PortsPanel pwmPanel,
 					  dioPanel,
 					  ainPanel,
-					  canPanel;
+					  pcmPanel;
 	
 	PortEditorPanel pep;
 	
@@ -45,17 +45,20 @@ public class PortSelectorPanel extends JTabbedPane {
 		//Setup IDs
 		List<Integer> pwmIDs = List.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9),
 					  dioIDs = List.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9),
-					  ainIDs = List.of(0, 1, 2, 3);
+					  ainIDs = List.of(0, 1, 2, 3),
+					  pcmIDs = List.of(0, 1, 2, 3, 4, 5, 6, 7);
 		
 		//Setup panels with selectors
 		pwmPanel = new PortsPanel("Select a PWM item to edit", "pwm", pwmIDs, pep, width - 20);
 		dioPanel = new PortsPanel("Select a DIO item to edit", "dio", dioIDs, pep, width - 20);
-		ainPanel = new PortsPanel("Select a AIn item to edit", "ain", ainIDs, pep, width - 20);
+		ainPanel = new PortsPanel("Select an AIn item to edit", "ain", ainIDs, pep, width - 20);
+		pcmPanel = new PortsPanel("Select a PCM item to edit", "pcm", pcmIDs, pep, width - 20);
 		
 		//Add tabs
 		addTab("PWM", pwmPanel);
 		addTab("DIO", dioPanel);
 		addTab("AIn", ainPanel);
+		addTab("PCM", pcmPanel);
 		
 		addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
@@ -72,6 +75,7 @@ public class PortSelectorPanel extends JTabbedPane {
 		pwmPanel.resetItems();
 		dioPanel.resetItems();
 		ainPanel.resetItems();
+		pcmPanel.resetItems();
 	}
 	
 	/**
@@ -92,6 +96,10 @@ public class PortSelectorPanel extends JTabbedPane {
 			
 			case "analog in":
 				ainPanel.addItem(name);
+				break;
+			
+			case "pcm":
+				pcmPanel.addItem(name);
 				break;
 		}
 	}

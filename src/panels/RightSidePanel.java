@@ -15,6 +15,8 @@ public class RightSidePanel extends JPanel {
 	JPanel topPanel;
 	ImagePanel img;
 	
+	boolean sizeSet = false;
+	
 	/**
 	 * Default constructor
 	 * 
@@ -56,5 +58,10 @@ public class RightSidePanel extends JPanel {
 	 */
 	public void setImage(Image i) {
 		img.setImage(i);
+		
+		if(!sizeSet) {
+			setPreferredSize(getSize());
+			sizeSet = true;
+		}
 	}
 }
