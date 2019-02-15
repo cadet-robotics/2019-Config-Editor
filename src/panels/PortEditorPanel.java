@@ -83,6 +83,8 @@ public class PortEditorPanel extends JPanel implements ActionListener, NamedPane
 			}
 		}
 		
+		selectorPanel.sortItems();
+		
 		ready = true;
 		
 		//Update initial selections

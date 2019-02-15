@@ -2,6 +2,8 @@ package panels;
 
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.swing.BoxLayout;
@@ -80,6 +82,14 @@ public class ControlSelectorPanel extends JTabbedPane {
 	}
 	
 	/**
+	 * Sorts the control names alphabetically
+	 */
+	public void sortControls() {
+		axesPanel.sort();
+		buttonsPanel.sort();
+	}
+	
+	/**
 	 * Organization method for checking if a control is in the 'other' section
 	 * 
 	 * @param name The name of the control
@@ -137,6 +147,27 @@ class ControlsPanel extends JPanel {
 		add(valueLabel);
 		add(valueSelectorBox);
 		
+	}
+	
+	/**
+	 * Sorts combobox entries
+	 */
+	public void sort() {
+		List<String> items = new ArrayList<>();
+		
+		//Get items
+		for(int i = 0; i < controlSelectorBox.getItemCount(); i++) {
+			items.add(controlSelectorBox.getItemAt(i));
+		}
+		
+		controlSelectorBox.removeAllItems();
+		
+		Collections.sort(items);
+		
+		//Add items back
+		for(String s : items) {
+			controlSelectorBox.addItem(s);
+		}
 	}
 	
 	/**

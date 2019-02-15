@@ -71,6 +71,8 @@ public class ControlsEditorPanel extends JPanel implements ActionListener, Named
 			selectorPanel.addControl(mainWindow.format(k));
 		}
 		
+		selectorPanel.sortControls();
+		
 		ready = true;
 		
 		//Update initial selections

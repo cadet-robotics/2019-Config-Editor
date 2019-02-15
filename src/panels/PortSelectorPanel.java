@@ -9,6 +9,8 @@ import panels.components.Spacer;
 
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.swing.BoxLayout;
@@ -93,6 +95,12 @@ public class PortSelectorPanel extends JTabbedPane {
 				break;
 		}
 	}
+	
+	public void sortItems() {
+		pwmPanel.sort();
+		dioPanel.sort();
+		ainPanel.sort();
+	}
 }
 
 /**
@@ -138,6 +146,27 @@ class PortsPanel extends JPanel {
 		add(Spacer.genSpacer(20));
 		add(valueLabel);
 		add(valueSelectorBox);
+	}
+	
+	/**
+	 * Sorts combobox entries
+	 */
+	public void sort() {
+		List<String> items = new ArrayList<>();
+		
+		//Get items
+		for(int i = 0; i < itemSelectorBox.getItemCount(); i++) {
+			items.add(itemSelectorBox.getItemAt(i));
+		}
+		
+		itemSelectorBox.removeAllItems();
+		
+		Collections.sort(items);
+		
+		//Add items back
+		for(String s : items) {
+			itemSelectorBox.addItem(s);
+		}
 	}
 	
 	/**
