@@ -10,8 +10,10 @@ import panels.components.Spacer;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
@@ -43,10 +45,10 @@ public class PortSelectorPanel extends JTabbedPane {
 		this.pep = pep;
 		
 		//Setup IDs
-		List<Integer> pwmIDs = List.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9),
-					  dioIDs = List.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9),
-					  ainIDs = List.of(0, 1, 2, 3),
-					  pcmIDs = List.of(0, 1, 2, 3, 4, 5, 6, 7);
+		List<Integer> pwmIDs = intToList(new int[] {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}),
+					  dioIDs = intToList(new int[] {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}),
+					  ainIDs = intToList(new int[] {0, 1, 2, 3}),
+					  pcmIDs = intToList(new int[] {0, 1, 2, 3, 4, 5, 6, 7});
 		
 		//Setup panels with selectors
 		pwmPanel = new PortsPanel("Select a PWM item to edit", "pwm", pwmIDs, pep, width - 20);
@@ -104,10 +106,23 @@ public class PortSelectorPanel extends JTabbedPane {
 		}
 	}
 	
+	/**
+	 * Sorts the items
+	 */
 	public void sortItems() {
 		pwmPanel.sort();
 		dioPanel.sort();
 		ainPanel.sort();
+	}
+	
+	/**
+	 * Converts an array of ints into a List of Integers
+	 * 
+	 * @param ar The array to convert
+	 * @return The List
+	 */
+	public List<Integer> intToList(int[] ar){
+		return Arrays.stream(ar).boxed().collect(Collectors.toList());
 	}
 }
 

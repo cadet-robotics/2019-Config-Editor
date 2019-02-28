@@ -3,8 +3,10 @@ package panels;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
@@ -39,8 +41,8 @@ public class ControlSelectorPanel extends JTabbedPane {
 		this.cep = cep;
 		
 		//Setup IDs
-		List<Integer> buttonIDs = List.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12),
-					  axisIDs = List.of(0, 1, 2, 3);
+		List<Integer> buttonIDs = intToList(new int[] {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}),
+					  axisIDs = intToList(new int[] {0, 1, 2, 3});
 		
 		//Setup panels with the selectors
 		buttonsPanel = new ControlsPanel("Select a control to edit", "buttons", buttonIDs, cep, width - 20);
@@ -101,6 +103,16 @@ public class ControlSelectorPanel extends JTabbedPane {
 		}
 		
 		return false;
+	}
+	
+	/**
+	 * Converts an array of integers to a List of Integers
+	 * 
+	 * @param ar The array to convert
+	 * @return The list
+	 */
+	public List<Integer> intToList(int[] ar) {
+		return Arrays.stream(ar).boxed().collect(Collectors.toList());
 	}
 }
 
